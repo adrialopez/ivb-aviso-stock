@@ -38,6 +38,7 @@ class IVB_Aviso_Stock_Core {
 		add_action( 'woocommerce_single_product_summary', array( __CLASS__, 'render_simple_form' ), 31 );
 		add_filter( 'woocommerce_available_variation', array( __CLASS__, 'variation_form' ), 10, 3 );
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'assets' ) );
+		add_filter( 'body_class', array( __CLASS__, 'body_class' ) );
 
 		// Alta por AJAX.
 		add_action( 'wp_ajax_ivb_aviso_stock', array( __CLASS__, 'ajax_subscribe' ) );
@@ -86,6 +87,17 @@ class IVB_Aviso_Stock_Core {
 			'nonce' => wp_create_nonce( 'ivb_aviso_stock' ),
 		) );
 		wp_enqueue_style( 'ivb-aviso-stock', IVB_AVISO_STOCK_URL . 'assets/ivb-aviso-stock.css', array(), IVB_AVISO_STOCK_VERSION );
+	}
+
+	// En los productos con aviso se oculta el rótulo de agotado del tema («Próximamente»): lo sustituye el formulario.
+	public static function body_class( $classes ) {
+		if ( is_product() ) {
+			$product = wc_get_product( get_queried_object_id() );
+			if ( $product && self::enabled( $product ) ) {
+				$classes[] = 'ivb-as-on';
+			}
+		}
+		return $classes;
 	}
 
 	public static function render_simple_form() {

@@ -1,8 +1,14 @@
-.ivb-as-form { margin: 1em 0; padding: 14px 16px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; }
-.ivb-as-title { margin: 0 0 10px; }
-.ivb-as-row { display: flex; flex-wrap: wrap; gap: 8px; }
-.ivb-as-row input[type=email] { flex: 1 1 200px; min-width: 0; }
+/* Se integra con el tema: sin caja, color heredado y botón con el estilo del tema. */
+.ivb-as-on .stock.out-of-stock,
+.ivb-as-on .soldout { display: none !important; }
+.ivb-as-form { margin: 20px 0; padding: 0; background: none; border: 0; text-align: center; color: inherit; }
+.ivb-as-title { margin: 0 0 14px; color: inherit; }
+.ivb-as-row { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ivb-as-row input[type=email] { width: 100%; max-width: 360px; margin: 0; background: transparent; color: inherit; border: 1px solid currentColor; }
+.ivb-as-row input[type=email]::placeholder { color: inherit; opacity: .7; }
+.ivb-as-btn.button { margin: 0; color: inherit; background: transparent; border: 1px solid currentColor; box-shadow: none; cursor: pointer; }
+.ivb-as-btn.button:hover { background: rgba(255,255,255,.18); color: inherit; }
+.ivb-as-btn.button[disabled] { opacity: .6; cursor: default; }
 .ivb-as-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-.ivb-as-msg { margin: 8px 0 0; }
-.ivb-as-msg.ok { color: #1a7f37; }
-.ivb-as-msg.err { color: #b32d2e; }
+.ivb-as-msg { margin: 10px 0 0; color: inherit; font-weight: 600; }
+.ivb-as-msg:empty { display: none; }
