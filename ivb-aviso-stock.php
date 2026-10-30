@@ -2,7 +2,7 @@
 /**
  * Plugin Name: IVB Aviso de Stock
  * Description: Botón «Avísame cuando haya stock» en productos agotados de WooCommerce y envío de un email automático cuando vuelven a tener stock.
- * Version: 1.2.0
+ * Version: 1.3.0
  * Author: Adrià López
  * Author URI: https://adria-lopez.com
  * Requires Plugins: woocommerce
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'IVB_AVISO_STOCK_VERSION', '1.2.0' );
+define( 'IVB_AVISO_STOCK_VERSION', '1.3.0' );
 define( 'IVB_AVISO_STOCK_DIR', plugin_dir_path( __FILE__ ) );
 define( 'IVB_AVISO_STOCK_URL', plugin_dir_url( __FILE__ ) );
 

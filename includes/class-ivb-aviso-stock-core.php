@@ -23,9 +23,14 @@ class IVB_Aviso_Stock_Core {
 			created datetime NOT NULL,
 			notified datetime NULL DEFAULT NULL,
 			PRIMARY KEY  (id),
-			UNIQUE KEY product_email (product_id,email),
+			KEY product_email (product_id,email),
 			KEY pending (product_id,notified)
 		) {$charset};" );
+		// Hasta 1.2.0 el índice era único; ahora cada petición queda como registro propio (historial).
+		$unique = $wpdb->get_var( "SELECT 1 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='{$table}' AND INDEX_NAME='product_email' AND NON_UNIQUE=0 LIMIT 1" );
+		if ( $unique ) {
+			$wpdb->query( "ALTER TABLE {$table} DROP INDEX product_email, ADD INDEX product_email (product_id,email)" );
+		}
 		update_option( 'ivb_aviso_stock_db', IVB_AVISO_STOCK_VERSION );
 	}
 
@@ -154,14 +159,16 @@ class IVB_Aviso_Stock_Core {
 
 		global $wpdb;
 		$table = self::table();
-		$wpdb->query( $wpdb->prepare(
-			"INSERT INTO {$table} (product_id,email,user_id,created,notified) VALUES (%d,%s,%d,%s,NULL)
-			 ON DUPLICATE KEY UPDATE user_id=VALUES(user_id), created=VALUES(created), notified=NULL",
-			$product_id,
-			strtolower( $email ),
-			get_current_user_id(),
-			current_time( 'mysql' )
-		) );
+		$email   = strtolower( $email );
+		$pending = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} WHERE product_id=%d AND email=%s AND notified IS NULL LIMIT 1", $product_id, $email ) );
+		if ( ! $pending ) {
+			$wpdb->insert( $table, array(
+				'product_id' => $product_id,
+				'email'      => $email,
+				'user_id'    => get_current_user_id(),
+				'created'    => current_time( 'mysql' ),
+			) );
+		}
 		wp_send_json_success( array( 'message' => __( 'Hecho. Te enviaremos un email cuando vuelva a haber stock.', 'ivb-aviso-stock' ) ) );
 	}
 
