@@ -48,7 +48,30 @@ class IVB_Aviso_Stock_Core {
 		add_action( 'woocommerce_variation_set_stock_status', array( __CLASS__, 'on_status' ), 10, 3 );
 		add_action( 'woocommerce_product_object_updated_props', array( __CLASS__, 'on_props' ), 10, 2 );
 
+		// Casilla por producto: el aviso solo se ofrece en los productos marcados.
+		add_action( 'woocommerce_product_options_stock_fields', array( __CLASS__, 'field' ) );
+		add_action( 'woocommerce_process_product_meta', array( __CLASS__, 'save_field' ) );
+
 		add_action( self::CRON_HOOK, array( __CLASS__, 'send_for_product' ) );
+	}
+
+	/* ---------- Activación por producto ---------- */
+
+	public static function enabled( $product ) {
+		$id = $product->is_type( 'variation' ) ? $product->get_parent_id() : $product->get_id();
+		return 'yes' === get_post_meta( $id, '_ivb_aviso_stock', true );
+	}
+
+	public static function field() {
+		woocommerce_wp_checkbox( array(
+			'id'          => '_ivb_aviso_stock',
+			'label'       => __( 'Aviso de stock', 'ivb-aviso-stock' ),
+			'description' => __( 'Mostrar «Avísame cuando haya stock» si el producto (o una variación) está agotado.', 'ivb-aviso-stock' ),
+		) );
+	}
+
+	public static function save_field( $post_id ) {
+		update_post_meta( $post_id, '_ivb_aviso_stock', isset( $_POST['_ivb_aviso_stock'] ) ? 'yes' : 'no' ); // phpcs:ignore WordPress.Security.NonceVerification
 	}
 
 	/* ---------- Frontend ---------- */
@@ -67,14 +90,14 @@ class IVB_Aviso_Stock_Core {
 
 	public static function render_simple_form() {
 		global $product;
-		if ( ! $product || $product->is_type( array( 'variable', 'grouped', 'external' ) ) || $product->is_in_stock() ) {
+		if ( ! $product || $product->is_type( array( 'variable', 'grouped', 'external' ) ) || $product->is_in_stock() || ! self::enabled( $product ) ) {
 			return;
 		}
 		echo self::form_html( $product->get_id() ); // phpcs:ignore WordPress.Security.EscapeOutput
 	}
 
 	public static function variation_form( $data, $parent, $variation ) {
-		if ( ! $variation->is_in_stock() ) {
+		if ( ! $variation->is_in_stock() && self::enabled( $variation ) ) {
 			$data['availability_html'] = ( $data['availability_html'] ?? '' ) . self::form_html( $variation->get_id() );
 		}
 		return $data;
@@ -110,7 +133,7 @@ class IVB_Aviso_Stock_Core {
 		$email      = is_user_logged_in() ? wp_get_current_user()->user_email : sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 		$product    = $product_id ? wc_get_product( $product_id ) : false;
 
-		if ( ! $product || ! is_email( $email ) ) {
+		if ( ! $product || ! self::enabled( $product ) || ! is_email( $email ) ) {
 			wp_send_json_error( array( 'message' => __( 'Revisa el email e inténtalo de nuevo.', 'ivb-aviso-stock' ) ) );
 		}
 		if ( $product->is_in_stock() ) {
