@@ -85,9 +85,13 @@ class IVB_Aviso_Stock_Core {
 		ob_start();
 		?>
 		<form class="ivb-as-form" data-product="<?php echo esc_attr( $product_id ); ?>">
-			<p class="ivb-as-title"><?php esc_html_e( 'Producto agotado. ¿Quieres que te avisemos por email cuando vuelva a haber stock?', 'ivb-aviso-stock' ); ?></p>
+			<p class="ivb-as-title"><?php esc_html_e( 'Producto agotado. Te avisaremos por email cuando vuelva a haber stock.', 'ivb-aviso-stock' ); ?></p>
 			<div class="ivb-as-row">
-				<input type="email" name="email" value="<?php echo esc_attr( $email ); ?>" placeholder="<?php esc_attr_e( 'Tu email', 'ivb-aviso-stock' ); ?>" required />
+				<?php if ( $email ) : ?>
+					<input type="hidden" name="email" value="<?php echo esc_attr( $email ); ?>" />
+				<?php else : ?>
+					<input type="email" name="email" value="" placeholder="<?php esc_attr_e( 'Tu email', 'ivb-aviso-stock' ); ?>" required />
+				<?php endif; ?>
 				<input type="text" name="website" value="" tabindex="-1" autocomplete="off" class="ivb-as-hp" aria-hidden="true" />
 				<button type="submit" class="button ivb-as-btn"><?php esc_html_e( 'Avísame cuando haya stock', 'ivb-aviso-stock' ); ?></button>
 			</div>
@@ -103,7 +107,7 @@ class IVB_Aviso_Stock_Core {
 			wp_send_json_success( array( 'message' => __( 'Listo.', 'ivb-aviso-stock' ) ) );
 		}
 		$product_id = absint( $_POST['product_id'] ?? 0 );
-		$email      = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
+		$email      = is_user_logged_in() ? wp_get_current_user()->user_email : sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );
 		$product    = $product_id ? wc_get_product( $product_id ) : false;
 
 		if ( ! $product || ! is_email( $email ) ) {
