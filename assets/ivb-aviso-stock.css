@@ -1,0 +1,8 @@
+.ivb-as-form { margin: 1em 0; padding: 14px 16px; border: 1px solid #ddd; border-radius: 4px; background: #fafafa; }
+.ivb-as-title { margin: 0 0 10px; }
+.ivb-as-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ivb-as-row input[type=email] { flex: 1 1 200px; min-width: 0; }
+.ivb-as-hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.ivb-as-msg { margin: 8px 0 0; }
+.ivb-as-msg.ok { color: #1a7f37; }
+.ivb-as-msg.err { color: #b32d2e; }
